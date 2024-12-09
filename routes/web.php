@@ -1,8 +1,6 @@
 <?php
 
-use App\Http\Controllers\PurposeController;
-use App\Livewire\PostTable;
-use App\Livewire\ProstoyTable;
+use App\Http\Controllers\ProjectController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -19,5 +17,7 @@ Route::middleware([
     })->name('dashboard');
 });
 
-Route::get('/prostoys', ProstoyTable::class)->name('prostoys.index');
-
+Route::group(['middleware' => ['auth']], function () {
+    Route::get('/prostoy', [ProjectController::class, 'index'])->name('prostoy');
+    Route::get('/other-expense', [ProjectController::class, 'otherExpense'])->name('other-expense');
+});

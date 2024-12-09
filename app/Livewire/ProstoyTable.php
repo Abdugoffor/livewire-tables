@@ -15,6 +15,11 @@ class ProstoyTable extends DataTableComponent
 
     protected $listeners = ['refreshDatatable' => '$refresh'];
 
+    public function builder(): \Illuminate\Database\Eloquent\Builder
+    {
+        return Prostoy::query()->with(['client', 'carrier', 'sales', 'operation']);
+    }
+
     public function configure(): void
     {
         $this->setPrimaryKey('id')
@@ -29,41 +34,40 @@ class ProstoyTable extends DataTableComponent
                 ->sortable(),
             Column::make('Client', 'client_id')
                 ->sortable()
-                ->searchable(),
+                ->searchable()
+                ->format(fn($value, $row) => $row->client->name ?? 'N/A'),
+            Column::make('Carrier', 'carrier_id')
+                ->sortable()
+                ->searchable()
+                ->format(fn($value, $row) => $row->carrier->name ?? 'N/A'),
+            // Column::make('Sales', 'sales_id')
+            //     ->sortable()
+            //     ->format(fn($value, $row) => $row->sales->name ?? 'N/A'),
+            // Column::make('Operation', 'operation_id')
+            //     ->sortable()
+            //     ->format(fn($value, $row) => $row->operation->name ?? 'N/A'),
             Column::make('Client Amount', 'client_amount')
                 ->sortable()
                 ->searchable(),
             Column::make('Carrier Amount', 'carrier_amount')
                 ->sortable()
                 ->searchable(),
-            Column::make('Currency', 'carrier_currency')
+            Column::make('Carrier Currency', 'carrier_currency')
                 ->sortable(),
             Column::make('Actions')
                 ->label(fn($row) => view('livewire.prostoy.actions', ['row' => $row])),
         ];
     }
 
-    public function openSidebar($id = null)
-    {
-        $this->prostoy = $id ? Prostoy::findOrFail($id) : new Prostoy();
-        $this->showSidebar = true;
-    }
 
-    public function closeSidebar()
+    public function delete(Prostoy $prostoy)
     {
-        $this->showSidebar = false;
+        $prostoy->delete();
+        $this->listeners['refreshDatatable'];
     }
-
-    public function save()
+    public function sendToChild($prostoy)
     {
-        $this->prostoy->save();
-        $this->showSidebar = false;
-        $this->emit('refreshDatatable');
-    }
+        $this->dispatch('edit', ['prostoy' => $prostoy])->to('create-prostoy');
 
-    public function delete($id)
-    {
-        Prostoy::findOrFail($id)->delete();
-        $this->emit('refreshDatatable');
     }
 }

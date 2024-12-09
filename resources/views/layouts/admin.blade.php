@@ -19,11 +19,14 @@
             <h1 class="text-xl font-bold text-gray-700">Admin Panel</h1>
         </div>
         <nav class="flex-1 p-4 space-y-2">
-            <a href="/prostoys" wire:navigate class="block px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">
+            <a href="/prostoy" wire:navigate class="block px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">
                 Простой
             </a>
-            <a href="#" wire:navigate class="block px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">
+            <a href="/other-expense" wire:navigate class="block px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">
                 Другие расходы
+            </a>
+            <a href="/dashboard" wire:navigate class="block px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">
+                Дашборд
             </a>
         </nav>
     </aside>
