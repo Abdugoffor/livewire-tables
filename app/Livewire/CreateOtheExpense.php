@@ -11,7 +11,7 @@ class CreateOtheExpense extends Component
 {
     public $suppliers, $reasons, $supplier_id, $reason_id, $amount, $currency, $order_id, $id;
     public $activeForm = false;
-    protected $listeners = ['edit'];
+    protected $listeners = ['edit','createForm'];
     protected $rules = [
         'order_id' => 'required|integer',
         'supplier_id' => 'required|integer|exists:suppliers,id',
@@ -32,6 +32,10 @@ class CreateOtheExpense extends Component
     {
         $this->activeForm = !$this->activeForm;
     }
+    public function createForm()
+    {
+        $this->activeForm = true;
+    }
     public function save()
     {
         $this->validate();
@@ -49,6 +53,7 @@ class CreateOtheExpense extends Component
         $this->activeForm = false;
         $this->dispatch('othe-expense-table');
     }
+
     public function resetForm()
     {
         $this->createExpense();

@@ -17,7 +17,7 @@ Route::middleware([
     })->name('dashboard');
 });
 
+Route::get('/prostoy', [ProjectController::class, 'index'])->name('prostoy');
+Route::get('/other-expense', [ProjectController::class, 'otherExpense'])->name('other-expense');
 Route::group(['middleware' => ['auth']], function () {
-    Route::get('/prostoy', [ProjectController::class, 'index'])->name('prostoy');
-    Route::get('/other-expense', [ProjectController::class, 'otherExpense'])->name('other-expense');
 });

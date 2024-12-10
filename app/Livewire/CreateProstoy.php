@@ -17,7 +17,7 @@ class CreateProstoy extends Component
         $this->users = \App\Models\User::all();
     }
 
-    protected $listeners = ['edit'];
+    protected $listeners = ['edit' => 'edit', 'createForm' => 'createForm'];
 
     protected $rules = [
         'order_id' => 'required|integer',
@@ -73,6 +73,11 @@ class CreateProstoy extends Component
         $this->client_amount = $prostoy->client_amount;
         $this->client_currency = $prostoy->client_currency;
 
+        $this->prostoyForm = true;
+    }
+
+    public function createForm()
+    {
         $this->prostoyForm = true;
     }
 

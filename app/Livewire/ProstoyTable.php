@@ -10,7 +10,7 @@ class ProstoyTable extends DataTableComponent
 {
     public $model = Prostoy::class;
 
-    public $showSidebar = false;
+    public $prostoyForm = false;
     public $prostoy;
 
     protected $listeners = ['refreshDatatable' => '$refresh'];
@@ -25,6 +25,15 @@ class ProstoyTable extends DataTableComponent
         $this->setPrimaryKey('id')
             ->setPaginationEnabled(true)
             ->setSearchEnabled(true);
+        $this->setConfigurableAreas([
+            'toolbar-right-start' => ['livewire.prostoy.add'],
+        ]);
+        $this->setBulkActions([
+            'deleteSelected' => 'Удалить выбранные',
+            'exportSelected' => 'Экспорт выбранные',
+        ]);
+        // $this->setBulkActionsCustomLabel('Выбрать действия');
+        
     }
 
     public function columns(): array
@@ -32,11 +41,11 @@ class ProstoyTable extends DataTableComponent
         return [
             Column::make('ID', 'id')
                 ->sortable(),
-            Column::make('Client', 'client_id')
+            Column::make('Клиент', 'client_id')
                 ->sortable()
                 ->searchable()
                 ->format(fn($value, $row) => $row->client->name ?? 'N/A'),
-            Column::make('Carrier', 'carrier_id')
+            Column::make('Перевозчик', 'carrier_id')
                 ->sortable()
                 ->searchable()
                 ->format(fn($value, $row) => $row->carrier->name ?? 'N/A'),
@@ -46,19 +55,45 @@ class ProstoyTable extends DataTableComponent
             // Column::make('Operation', 'operation_id')
             //     ->sortable()
             //     ->format(fn($value, $row) => $row->operation->name ?? 'N/A'),
-            Column::make('Client Amount', 'client_amount')
+            Column::make('Сумма клиента', 'client_amount')
                 ->sortable()
                 ->searchable(),
-            Column::make('Carrier Amount', 'carrier_amount')
+            Column::make('Сумма перевозчика', 'carrier_amount')
                 ->sortable()
                 ->searchable(),
-            Column::make('Carrier Currency', 'carrier_currency')
+            Column::make('Валюта', 'carrier_currency')
                 ->sortable(),
-            Column::make('Actions')
+            Column::make('Действия')
                 ->label(fn($row) => view('livewire.prostoy.actions', ['row' => $row])),
         ];
     }
+    public function deleteSelected()
+    {
+        $ids = $this->getSelected();
+        Prostoy::whereIn('id', $ids)->delete();
+        $this->listeners['refreshDatatable'];
+    }
+    public function exportSelected()
+    {
+        $ids = $this->getSelected(); 
 
+        $data = Prostoy::whereIn('id', $ids)->get()->toArray(); 
+
+        $filename = 'export_' . now()->format('Y_m_d_His') . '.csv';
+
+        $handle = fopen($filename, 'w');
+        fputcsv($handle, array_keys($data[0] ?? [])); 
+
+        foreach ($data as $row) {
+            fputcsv($handle, $row); 
+        }
+
+        fclose($handle);
+
+        $this->clearSelected();
+
+        return response()->download($filename)->deleteFileAfterSend();
+    }
 
     public function delete(Prostoy $prostoy)
     {
@@ -68,6 +103,12 @@ class ProstoyTable extends DataTableComponent
     public function sendToChild($prostoy)
     {
         $this->dispatch('edit', ['prostoy' => $prostoy])->to('create-prostoy');
+        $this->listeners['refreshDatatable'];
 
+    }
+    public function add()
+    {
+        $this->dispatch('createForm')->to('create-prostoy');
+        $this->listeners['refreshDatatable'];
     }
 }

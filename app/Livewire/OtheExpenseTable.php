@@ -22,6 +22,13 @@ class OtheExpenseTable extends DataTableComponent
         $this->setPrimaryKey('id')
             ->setPaginationEnabled(true)
             ->setSearchEnabled(true);
+        $this->setConfigurableAreas([
+            'toolbar-right-start' => ['livewire.prostoy.add'],
+        ]);
+        $this->setBulkActions([
+            'deleteSelected' => 'Удалить выбранные',
+            'exportSelected' => 'Экспорт выбранные',
+        ]);
     }
 
     public function columns(): array
@@ -29,29 +36,60 @@ class OtheExpenseTable extends DataTableComponent
         return [
             Column::make('ID', 'id')
                 ->sortable(),
-            Column::make('Order ID', 'order_id')
+            Column::make('ID заказа', 'order_id')
                 ->sortable()
                 ->searchable(),
-            Column::make('Supplier ID', 'supplier_id')
+            Column::make('Поставщик', 'supplier_id')
                 ->sortable()
                 ->searchable()
                 ->format(fn($value, $row) => $row->supplier->name ?? 'N/A'),
-            Column::make('Reason ID', 'reason_id')
+            Column::make('Причина', 'reason_id')
                 ->sortable()
                 ->format(fn($value, $row) => $row->reason->name ?? 'N/A'),
-            Column::make('Currency', 'currency')
+            Column::make('Валюта', 'currency')
                 ->sortable()
                 ->searchable(),
-            Column::make('Amount', 'amount')
+            Column::make('Сумма', 'amount')
                 ->sortable()
                 ->searchable(),
-            Column::make('Actions')
+            Column::make('Действия')
                 ->label(fn($row) => view('livewire.prostoy.actions', ['row' => $row])),
         ];
+    }
+    public function deleteSelected()
+    {
+        $ids = $this->getSelected();
+        OtherExpense::whereIn('id', $ids)->delete();
+        $this->listeners['refreshDatatable'];
+    }
+    public function exportSelected()
+    {
+        $ids = $this->getSelected();
+
+        $data = OtherExpense::whereIn('id', $ids)->get()->toArray();
+
+        $filename = 'export_' . now()->format('Y_m_d_His') . '.csv';
+
+        $handle = fopen($filename, 'w');
+        fputcsv($handle, array_keys($data[0] ?? []));
+
+        foreach ($data as $row) {
+            fputcsv($handle, $row);
+        }
+
+        fclose($handle);
+
+        $this->clearSelected();
+
+        return response()->download($filename)->deleteFileAfterSend();
     }
     public function sendToChild($expense)
     {
         $this->dispatch('edit', ['expense' => $expense])->to('create-othe-expense');
 
+    }
+    public function add()
+    {
+        $this->dispatch('createForm')->to('create-othe-expense');
     }
 }

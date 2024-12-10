@@ -1,8 +1,5 @@
 <div>
-    <!-- Button to open the sidebar -->
-    <button wire:click="createProstoy" class="px-4 py-2 bg-blue-500 text-white rounded mb-4">
-        Добавить
-    </button>
+    
 
     <!-- Sidebar -->
     @if ($prostoyForm)
