@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Prostoy;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
+use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
 use WireUi\Traits\WireUiActions;
 
 class ProstoyTable extends DataTableComponent
@@ -67,6 +68,21 @@ class ProstoyTable extends DataTableComponent
                 ->sortable(),
             Column::make('Действия')
                 ->label(fn($row) => view('livewire.prostoy.actions', ['row' => $row])),
+        ];
+    }
+    public function filters(): array
+    {
+        return [
+            SelectFilter::make('Показать удаленные')
+                ->options([
+                    '' => 'Нет', // Faqat mavjud yozuvlar
+                    '1' => 'Да', // O‘chirilgan yozuvlarni ko‘rsatish
+                ])
+                ->filter(function ($query, $value) {
+                    if ($value === '1') {
+                        $query->withTrashed();
+                    }
+                }),
         ];
     }
     public function deleteSelected()

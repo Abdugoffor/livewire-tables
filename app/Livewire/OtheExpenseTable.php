@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\OtherExpense;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
+use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
 use WireUi\Traits\WireUiActions;
 
 class OtheExpenseTable extends DataTableComponent
@@ -114,10 +115,30 @@ class OtheExpenseTable extends DataTableComponent
 
         return response()->download($filename)->deleteFileAfterSend();
     }
+    public function filters(): array
+    {
+        return [
+            SelectFilter::make('Показать удаленные')
+                ->options([
+                    '' => 'Нет', // Faqat mavjud yozuvlar
+                    '1' => 'Да', // O‘chirilgan yozuvlarni ko‘rsatish
+                ])
+                ->filter(function ($query, $value) {
+                    if ($value === '1') {
+                        $query->withTrashed();
+                    }
+                }),
+        ];
+    }
     public function sendToChild($expense)
     {
         $this->dispatch('edit', ['expense' => $expense])->to('create-othe-expense');
 
+    }
+    public function delete(OtherExpense $otherExpense)
+    {
+        $otherExpense->delete();
+        $this->listeners['refreshDatatable'];
     }
     public function add()
     {
