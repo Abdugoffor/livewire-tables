@@ -5,9 +5,11 @@ namespace App\Livewire;
 use App\Models\Prostoy;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
+use WireUi\Traits\WireUiActions;
 
 class ProstoyTable extends DataTableComponent
 {
+    use WireUiActions;
     public $model = Prostoy::class;
 
     public $prostoyForm = false;
@@ -33,7 +35,7 @@ class ProstoyTable extends DataTableComponent
             'exportSelected' => 'Экспорт выбранные',
         ]);
         // $this->setBulkActionsCustomLabel('Выбрать действия');
-        
+
     }
 
     public function columns(): array
@@ -70,22 +72,54 @@ class ProstoyTable extends DataTableComponent
     public function deleteSelected()
     {
         $ids = $this->getSelected();
+
         Prostoy::whereIn('id', $ids)->delete();
+
+        $this->notification()->confirm([
+            'title' => 'Вы уверены?',
+            'description' => 'Вы хотите восстановить удаленные записи?',
+            'icon' => 'question',
+            'accept' => [
+                'label' => 'Да, восстановить',
+                'method' => 'restoreDeleted',
+                'params' => json_encode($ids),
+            ],
+            'reject' => [
+                'label' => 'Нет, отменить',
+            ],
+        ]);
+
         $this->listeners['refreshDatatable'];
+        $this->clearSelected();
+
+    }
+    public function restoreDeleted($ids)
+    {
+        $ids = json_decode($ids, true);
+
+        Prostoy::withTrashed()->whereIn('id', $ids)->restore();
+
+        $this->notification()->success(
+
+            $title = 'Записи восстановлены!',
+
+            $description = 'Выбранные записи были успешно восстановлены.'
+
+        );
     }
     public function exportSelected()
     {
-        $ids = $this->getSelected(); 
+        $ids = $this->getSelected();
 
-        $data = Prostoy::whereIn('id', $ids)->get()->toArray(); 
+        $data = Prostoy::whereIn('id', $ids)->get()->toArray();
 
         $filename = 'export_' . now()->format('Y_m_d_His') . '.csv';
 
         $handle = fopen($filename, 'w');
-        fputcsv($handle, array_keys($data[0] ?? [])); 
+        fputcsv($handle, array_keys($data[0] ?? []));
 
         foreach ($data as $row) {
-            fputcsv($handle, $row); 
+            fputcsv($handle, $row);
         }
 
         fclose($handle);

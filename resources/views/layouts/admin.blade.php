@@ -10,9 +10,11 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
+    <wireui:scripts />
 </head>
 
 <body class="bg-gray-100 flex h-screen">
+
     <aside class="flex">
         <div class="flex flex-col items-center w-16 h-screen py-8 bg-white dark:bg-gray-900 dark:border-gray-700">
             <nav class="flex flex-col items-center flex-1 space-y-8 ">
@@ -68,6 +70,7 @@
                 </a>
             </nav>
 
+            <x-notifications position="top-right" />
             <div class="flex flex-col items-center mt-4 space-y-4">
                 <a href="#">
                     <img class="object-cover w-8 h-8 rounded-lg"
@@ -106,7 +109,8 @@
             <nav class="mt-4 -mx-3 space-y-6 ">
                 <div class="space-y-3 ">
 
-                    <a href="/prostoy" wire:navigate class="flex items-center px-3 py-2 text-gray-600 transition-colors duration-300 transform rounded-lg dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-200 hover:text-gray-700"
+                    <a href="/prostoy" wire:navigate
+                        class="flex items-center px-3 py-2 text-gray-600 transition-colors duration-300 transform rounded-lg dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-200 hover:text-gray-700"
                         href="#">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                             stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -116,7 +120,8 @@
 
                         <span class="mx-2 text-sm font-medium">Простой</span>
                     </a>
-                    <a href="/other-expense" wire:navigate class="flex items-center px-3 py-2 text-gray-600 transition-colors duration-300 transform rounded-lg dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-200 hover:text-gray-700"
+                    <a href="/other-expense" wire:navigate
+                        class="flex items-center px-3 py-2 text-gray-600 transition-colors duration-300 transform rounded-lg dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-200 hover:text-gray-700"
                         href="#">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                             stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -126,7 +131,8 @@
 
                         <span class="mx-2 text-sm font-medium">Другие расходы</span>
                     </a>
-                    <a href="/dashboard"wire:navigate class="flex items-center px-3 py-2 text-gray-600 transition-colors duration-300 transform rounded-lg dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-200 hover:text-gray-700"
+                    <a href="/dashboard"wire:navigate
+                        class="flex items-center px-3 py-2 text-gray-600 transition-colors duration-300 transform rounded-lg dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-200 hover:text-gray-700"
                         href="#">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                             stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -146,8 +152,33 @@
     <main class="flex-1 p-6">
         @yield('content')
     </main>
-
     @livewireScripts
 </body>
+<script>
+    window.$wireui.confirmNotification({
+        title: 'Are you Sure?',
+        description: 'Save the information?',
+        icon: 'question',
+        accept: {
+            label: 'Yes, save it',
+            method: 'save',
+            params: 'Saved'
+        },
+        reject: {
+            label: 'No, cancel',
+            method: 'cancel'
+        }
+    }, livewireComponentId)
+    
+    window.$wireui.notify({
+
+        title: 'Profile saved!',
+
+        description: 'Your profile was successfully saved',
+
+        icon: 'success'
+
+    })
+</script>
 
 </html>

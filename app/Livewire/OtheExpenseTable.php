@@ -5,9 +5,11 @@ namespace App\Livewire;
 use App\Models\OtherExpense;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
+use WireUi\Traits\WireUiActions;
 
 class OtheExpenseTable extends DataTableComponent
 {
+    use WireUiActions;
     public $model = OtherExpense::class;
 
     protected $listeners = ['refreshDatatable' => '$refresh'];
@@ -60,7 +62,36 @@ class OtheExpenseTable extends DataTableComponent
     {
         $ids = $this->getSelected();
         OtherExpense::whereIn('id', $ids)->delete();
+        $this->notification()->confirm([
+            'title' => 'Вы уверены?',
+            'description' => 'Вы хотите восстановить удаленные записи?',
+            'icon' => 'question',
+            'accept' => [
+                'label' => 'Да, восстановить',
+                'method' => 'restoreDeleted',
+                'params' => json_encode($ids),
+            ],
+            'reject' => [
+                'label' => 'Нет, отменить',
+            ],
+        ]);
+
         $this->listeners['refreshDatatable'];
+        $this->clearSelected();
+    }
+    public function restoreDeleted($ids)
+    {
+        $ids = json_decode($ids, true);
+
+        OtherExpense::withTrashed()->whereIn('id', $ids)->restore();
+
+        $this->notification()->success(
+
+            $title = 'Записи восстановлены!',
+
+            $description = 'Выбранные записи были успешно восстановлены.'
+
+        );
     }
     public function exportSelected()
     {
